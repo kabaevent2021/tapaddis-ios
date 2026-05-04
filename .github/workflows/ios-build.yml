@@ -27,7 +27,7 @@ jobs:
       run: |
         xcodebuild clean build \
           -project TapAddisCustomer.xcodeproj \
-          -scheme TapAddisCustomer \
+          -scheme TapAddis \
           -configuration Release \
           -sdk iphoneos \
           CODE_SIGN_IDENTITY="" \
@@ -41,7 +41,7 @@ jobs:
       working-directory: ./ios-customer
       run: |
         mkdir -p Payload
-        mv build/Release-iphoneos/TapAddisCustomer.app Payload/
+        mv build/Release-iphoneos/TapAddis.app Payload/
         zip -r TapAddisCustomer.ipa Payload
         
     - name: Upload IPA Artifact
