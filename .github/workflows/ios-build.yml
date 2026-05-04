@@ -1,0 +1,51 @@
+name: Build iOS App (Unsigned IPA)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - 'ios-customer/**'
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install XcodeGen
+      run: brew install xcodegen
+
+    - name: Generate Xcode Project
+      working-directory: ./ios-customer
+      run: xcodegen generate
+
+    - name: Build Unsigned App
+      working-directory: ./ios-customer
+      run: |
+        xcodebuild clean build \
+          -project TapAddisCustomer.xcodeproj \
+          -scheme TapAddisCustomer \
+          -configuration Release \
+          -sdk iphoneos \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          DSTROOT=$(pwd)/build \
+          OBJROOT=$(pwd)/build \
+          SYMROOT=$(pwd)/build
+          
+    - name: Package into IPA
+      working-directory: ./ios-customer
+      run: |
+        mkdir -p Payload
+        mv build/Release-iphoneos/TapAddisCustomer.app Payload/
+        zip -r TapAddisCustomer.ipa Payload
+        
+    - name: Upload IPA Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TapAddisCustomer-iOS-IPA
+        path: ios-customer/TapAddisCustomer.ipa
